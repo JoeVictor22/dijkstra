@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
+#define INF 100000
 typedef struct          // struct para armazenar os dados de uma aresta
 {
     int aresta;         // indice da aresta
@@ -111,16 +111,42 @@ void cria_grafo(char *arquivo){
   fclose(file);
 }
 
+void printar_saida(int vetor_anterior[], float custo_final){
+    
+    printf("Caminho mínimo do vértice %d para o vértice %d: ", vertice_origem, vertice_destino);
+    
+    int vetor_saida[quantidade_vertices-1];
+    int size=1;
+    int callback=vertice_destino;
+    
+    vetor_saida[0]=vertice_destino;
+    
+    while(callback!=0){
+    vetor_saida[size]=vetor_anterior[callback-1];
+        callback=vetor_saida[size];
+    size++;
+    }
+
+    for (int i=0;i<size-2;size--){
+        printf("(%d, %d)", vetor_saida[size-2],vetor_saida[size-3]);
+    }
+    printf("\n");
+
+    printf("Custo: %.0f\n", custo_final);
+}
 
 void Dijkstra(){
-    double custo[quantidade_vertices];
+    int custo[quantidade_vertices];
     int anterior[quantidade_vertices];
-    int usados[quantidade_vertices];
+    int usados[quantidade_arcos];
 
     for(int i = 0; i < quantidade_vertices; i++){
-        usados[i] = 0;
-        custo[i] = INFINITY;
+        custo[i] = INF;
         anterior[i] = -1;
+    }
+
+    for(int i = 0; i < quantidade_arcos; i++){
+        usados[i] = 0;
     }
     
     int inicio = vertice_origem-1; // index da aresta de origem
@@ -128,34 +154,50 @@ void Dijkstra(){
     usados[inicio] = 1;
     anterior[inicio] = 0;  
 
-    while(usados[vertice_destino-1] == 0){    
-        //printf("%d \n", usados[vertice_destino]);
-        float menor_custo = INFINITY;
-        int prox_inicial = -1;
 
+    printf("comecou em -> %d \n", inicio);
+    while(usados[vertice_destino-1] == 0){    
+        int menor_custo = INF;
+        int prox_inicial = -1;
+        printf("\n\nRESET\n\n");
         for(int i = 0; i < quantidade_arcos; i++){ // iterando sobre as arestas
             if (GRAFO[i].vertice_inicio == inicio){ // aquela aresta é a de inicio?
-                //printf("1");
-        
                 custo_atual = custo[inicio] + GRAFO[i].peso; // incrementa custo_atual
-                //printf("\nCUSTO %d\n", custo_atual);
+                printf("\nCUSTO (%d + %d = %d)\n", custo[inicio], GRAFO[i].peso, custo_atual);
                 /*
                     verifica o custo e se o vertice atual ja foi usado
                 */
                 if (custo_atual < custo[GRAFO[i].vertice_fim] && usados[GRAFO[i].vertice_fim] == 0){ 
                     custo[GRAFO[i].vertice_fim] = custo_atual;
-                    anterior[GRAFO[i].vertice_fim] = inicio+1;
+                    anterior[GRAFO[i].vertice_fim] = inicio;
                     // printf("%d ", GRAFO[i].vertice_fim);
+                    printf("morri¹");
                 }
                 if (menor_custo > custo[GRAFO[i].vertice_fim] && usados[GRAFO[i].vertice_fim] == 0){
                     menor_custo = custo[GRAFO[i].vertice_fim];
                     prox_inicial = GRAFO[i].vertice_fim;
-                    // printf("%d ", GRAFO[i].vertice_inicio);
+                    printf("morri²");
                 }
+
+                printf("\nCUSTOS i=%d\n", i);
+                for(int i = 0; i <quantidade_vertices; i++ ){
+                    printf("%d | ", custo[i]);
+                }
+                printf("\nVISITADO i=%d\n", i);
+                for(int i = 0; i <quantidade_arcos; i++ ){
+                    printf("%d | ", usados[i]);
+                }
+                printf("\nANTERIOR i=%d\n", i);
+                for(int i = 0; i <quantidade_vertices; i++ ){
+                    printf("%d | ", anterior[i]);
+                }
+                getchar();
             }
         }
-        //printf("Sai\n");
+        
+        printf("SAIDAQ DISGRAÇA %d\n", prox_inicial);
         if(prox_inicial!=-1){
+            printf("foi para -> %d\n", prox_inicial);
             inicio = prox_inicial;
             usados[inicio] = 1; 
         }
@@ -167,12 +209,14 @@ void Dijkstra(){
     }
     printf("\n----CUSTO----\n");
     for (int i=0;i<quantidade_vertices; i++){
-        printf("%.0f ",custo[i]);
+        printf("%d ",custo[i]);
     }
     printf("\n----ANTERIOR----\n");
     for (int i=0;i<quantidade_vertices; i++){
         printf("%d ",anterior[i]);
     }
     printf("\n");
+    printar_saida(anterior,custo[vertice_destino-1]);
+
     libera_grafo();   
 }
