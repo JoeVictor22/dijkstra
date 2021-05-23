@@ -21,6 +21,7 @@ void set_valor(int *matriz, int valor, int linha, int coluna, int matriz_tam_are
 
 int *cria_matriz(int aresta, int vertice){
 	int (*matriz)[vertice] = malloc(aresta * vertice * sizeof(int));
+
 	// use like // mat[(i*COL) + j] = 0 ;
 
 	if (matriz != NULL){
