@@ -190,24 +190,12 @@ void Dijkstra(){
     libera_grafo();
 }
 
-/* Função para concatenar o caminho do arquivo */
-char* concat(const char *s1, const char *s2)
-{
-    char *result = malloc(strlen(s1) + strlen(s2) + 1);
-    strcpy(result, s1);
-    strcat(result, s2);
-    return result;
-}
-
 int main(){
-    char *str;
-    char str1[10] = "arquivos/";
-    char str2[30];
+    char str[30];
 
     printf("Insira o nome do arquivo: ");
-    scanf("%s", str2);
+    scanf("%s", str);
 
-    str = concat(str1,str2);
 	cria_grafo(str);
 	Dijkstra();
 	return 0;
