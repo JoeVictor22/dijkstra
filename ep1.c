@@ -1,7 +1,7 @@
 /*
 EQUIPE DE DESENVOLVIMENTO:
 Davi Pinho da Silva
-Gleyson
+Francisco Gleyson Braga Vieira
 Joel Victor de Castro Galvão
 Raynan Serafim de Souza
 */
