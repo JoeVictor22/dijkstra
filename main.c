@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 int main(){
-	cria_grafo("arquivo3.txt");
+	cria_grafo("testes/arquivo3.txt");
 	print_arestas();
 	Dijkstra();
 	return 0;

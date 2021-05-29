@@ -1,22 +1,25 @@
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#define INF 100000
+#define INF 2147483647
+
 typedef struct          // struct para armazenar os dados de uma aresta
 {
     int aresta;         // indice da aresta
     int vertice_inicio; // vertice origem
     int vertice_fim;    // vertice destino
     int peso;           // peso da aresta
-} Aresta; 
+} Aresta;
 
 Aresta *GRAFO;          // Ponteiro para as arestas do grafo
-int quantidade_vertices; 
+int quantidade_vertices;
 int quantidade_arcos;
 int vertice_origem;
 int vertice_destino;
 int custo_atual = 0;
-
+int arestas_achadas=0;
+int no_lock=0;
+int aux=0;
 
 void set_aresta(int index, int v_inicio, int v_fim, int peso){
     /*
@@ -26,8 +29,8 @@ void set_aresta(int index, int v_inicio, int v_fim, int peso){
     new_aresta.aresta = index;
     new_aresta.vertice_inicio = v_inicio;
     new_aresta.vertice_fim = v_fim;
-    new_aresta.peso = peso;   
-    
+    new_aresta.peso = peso;
+
     GRAFO[index] = new_aresta;
 }
 
@@ -63,13 +66,13 @@ void libera_grafo(){
 
 void cria_grafo(char *arquivo){
     /*
-    Realiza leitura do arquivo.txt e construi o vetor de arestas para ser utilizado pelo algoritmo  
+    Realiza leitura do arquivo.txt e construi o vetor de arestas para ser utilizado pelo algoritmo
     */
     int palavra[10]; // buffer para file
 
     FILE *file = fopen(arquivo, "r");
-    if(file == NULL){ 
-        exit(1); 
+    if(file == NULL){
+        exit(1);
     }
 
     /* Captura variáveis globais */
@@ -79,9 +82,9 @@ void cria_grafo(char *arquivo){
     quantidade_arcos = *palavra;
     fscanf(file, "%d", palavra);
     vertice_origem = *palavra;
-    fscanf(file, "%d", palavra);    
+    fscanf(file, "%d", palavra);
     vertice_destino = *palavra;
-    
+
     aloca_grafo();
 
     printf("%d / %d / %d / %d\n", quantidade_vertices, quantidade_arcos, vertice_origem, vertice_destino);
@@ -92,13 +95,13 @@ void cria_grafo(char *arquivo){
         /*
         Cria uma aresta para cada par de vertices com peso
         */
-        fscanf(file, "%d", palavra);        
+        fscanf(file, "%d", palavra);
         int v_inicio = *palavra;
 
         fscanf(file, "%d", palavra);
         int v_fim = *palavra;
-        
-        fscanf(file, "%d", palavra); 
+
+        fscanf(file, "%d", palavra);
         int peso = *palavra;
 
         printf("%d - %d - %d\n", v_inicio-1, v_fim-1, peso);
@@ -112,15 +115,15 @@ void cria_grafo(char *arquivo){
 }
 
 void printar_saida(int vetor_anterior[], float custo_final){
-    
+
     printf("Caminho mínimo do vértice %d para o vértice %d: ", vertice_origem, vertice_destino);
-    
+
     int vetor_saida[quantidade_vertices-1];
     int size=1;
     int callback=vertice_destino;
-    
+
     vetor_saida[0]=vertice_destino;
-    
+
     while(callback!=0){
     vetor_saida[size]=vetor_anterior[callback-1];
         callback=vetor_saida[size];
@@ -148,28 +151,34 @@ void Dijkstra(){
     for(int i = 0; i < quantidade_arcos; i++){
         usados[i] = 0;
     }
-    
+
     int inicio = vertice_origem-1; // index da aresta de origem
     custo[inicio] = 0;
     usados[inicio] = 1;
-    anterior[inicio] = 0;  
+    anterior[inicio] = 0;
 
 
     printf("comecou em -> %d \n", inicio);
-    while(usados[vertice_destino-1] == 0){    
+    while(usados[vertice_destino-1] == 0){
         int menor_custo = INF;
         int prox_inicial = -1;
         printf("\n\nRESET\n\n");
+        arestas_achadas=0;
+        no_lock=0;
+
         for(int i = 0; i < quantidade_arcos; i++){ // iterando sobre as arestas
             if (GRAFO[i].vertice_inicio == inicio){ // aquela aresta é a de inicio?
+
+                arestas_achadas++;
+
                 custo_atual = custo[inicio] + GRAFO[i].peso; // incrementa custo_atual
                 printf("\nCUSTO (%d + %d = %d)\n", custo[inicio], GRAFO[i].peso, custo_atual);
                 /*
                     verifica o custo e se o vertice atual ja foi usado
                 */
-                if (custo_atual < custo[GRAFO[i].vertice_fim] && usados[GRAFO[i].vertice_fim] == 0){ 
+                if (custo_atual < custo[GRAFO[i].vertice_fim] && usados[GRAFO[i].vertice_fim] == 0){
                     custo[GRAFO[i].vertice_fim] = custo_atual;
-                    anterior[GRAFO[i].vertice_fim] = inicio;
+                    anterior[GRAFO[i].vertice_fim] = inicio+1;
                     // printf("%d ", GRAFO[i].vertice_fim);
                     printf("morri¹");
                 }
@@ -179,7 +188,12 @@ void Dijkstra(){
                     printf("morri²");
                 }
 
-                printf("\nCUSTOS i=%d\n", i);
+                if (usados[GRAFO[i].vertice_fim] == 1){
+                    no_lock++;
+                }
+
+
+                /*printf("\nCUSTOS i=%d\n", i);
                 for(int i = 0; i <quantidade_vertices; i++ ){
                     printf("%d | ", custo[i]);
                 }
@@ -191,15 +205,17 @@ void Dijkstra(){
                 for(int i = 0; i <quantidade_vertices; i++ ){
                     printf("%d | ", anterior[i]);
                 }
-                getchar();
+                getchar();*/
             }
         }
-        
+
         printf("SAIDAQ DISGRAÇA %d\n", prox_inicial);
         if(prox_inicial!=-1){
             printf("foi para -> %d\n", prox_inicial);
             inicio = prox_inicial;
-            usados[inicio] = 1; 
+            usados[inicio] = 1;
+        }else if (arestas_achadas==no_lock){
+            break;
         }
     }
 
@@ -218,5 +234,5 @@ void Dijkstra(){
     printf("\n");
     printar_saida(anterior,custo[vertice_destino-1]);
 
-    libera_grafo();   
+    libera_grafo();
 }
