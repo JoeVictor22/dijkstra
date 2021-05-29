@@ -1,14 +1,22 @@
+/*
+EQUIPE DE DESENVOLVIMENTO:
+Davi Pinho da Silva
+Gleyson
+Joel Victor de Castro Galvão
+Raynan Serafim de Souza
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #define INF 2147483647
 
-typedef struct          // struct para armazenar os dados de uma aresta
+typedef struct          // Struct para armazenar os dados de uma aresta
 {
-    int aresta;         // indice da aresta
-    int vertice_inicio; // vertice origem
-    int vertice_fim;    // vertice destino
-    int peso;           // peso da aresta
+    int aresta;         // Indice da aresta
+    int vertice_inicio; // Vértice origem
+    int vertice_fim;    // Vértice destino
+    int peso;           // Peso da aresta
 } Aresta;
 
 Aresta *GRAFO;          // Ponteiro para as arestas do grafo
@@ -22,9 +30,7 @@ int no_lock=0;
 int aux=0;
 
 void set_aresta(int index, int v_inicio, int v_fim, int peso){
-    /*
-    Cria uma nova aresta e a salva no index informado
-    */
+    /* Cria uma nova aresta e a salva no index informado */
     Aresta new_aresta;
     new_aresta.aresta = index;
     new_aresta.vertice_inicio = v_inicio;
@@ -35,25 +41,19 @@ void set_aresta(int index, int v_inicio, int v_fim, int peso){
 }
 
 Aresta get_aresta(int index){
-    /*
-    Captura uma aresta do grafo
-    */
+    /* Captura uma aresta do grafo */
     return GRAFO[index];
 }
 
 void print_arestas(){
-    /*
-    Utilitário para printar as arestas
-    */
+    /* Utilitário para printar as arestas */
     for(int i = 0; i < quantidade_arcos; i++){
         printf("%d = %d -> %d : %d\n", GRAFO[i].aresta, GRAFO[i].vertice_inicio, GRAFO[i].vertice_fim, GRAFO[i].peso);
     }
 }
 
 void aloca_grafo(){
-    /*
-    Aloca o espaçõ de memória a ser usado pelo programa
-    */
+    /* Aloca o espaço de memória a ser usado pelo programa */
     GRAFO = malloc(quantidade_arcos * sizeof(Aresta));
     if (GRAFO == NULL){
         exit(1);
@@ -65,9 +65,7 @@ void libera_grafo(){
 }
 
 void cria_grafo(char *arquivo){
-    /*
-    Realiza leitura do arquivo.txt e construi o vetor de arestas para ser utilizado pelo algoritmo
-    */
+    /* Realiza leitura do arquivo.txt e construi o vetor de arestas para ser utilizado pelo algoritmo */
     int palavra[10]; // buffer para file
 
     FILE *file = fopen(arquivo, "r");
@@ -89,9 +87,7 @@ void cria_grafo(char *arquivo){
 
     int i = 0;
     while(i < quantidade_arcos){
-        /*
-        Cria uma aresta para cada par de vertices com peso
-        */
+        /* Cria uma aresta para cada par de vertices com peso */
         fscanf(file, "%d", palavra);
         int v_inicio = *palavra;
 
@@ -103,34 +99,33 @@ void cria_grafo(char *arquivo){
 
         set_aresta(i, v_inicio-1, v_fim-1, peso);
         i++;
-
     }
-
   fclose(file);
 }
 
-void printar_saida(int vetor_anterior[], float custo_final){
+void printar_saida(int vetor_anterior[], int custo_final){
+    if (custo_final == INF){
+        printf("Não existe caminho para a configuração informada");
+    }else{
+        printf("Caminho mínimo do vértice %d para o vértice %d: ", vertice_origem, vertice_destino);
 
-    printf("Caminho mínimo do vértice %d para o vértice %d: ", vertice_origem, vertice_destino);
+        int vetor_saida[quantidade_vertices-1];
+        int size=1;
+        int callback=vertice_destino;
 
-    int vetor_saida[quantidade_vertices-1];
-    int size=1;
-    int callback=vertice_destino;
+        vetor_saida[0]=vertice_destino;
 
-    vetor_saida[0]=vertice_destino;
+        while(callback!=0){
+        vetor_saida[size]=vetor_anterior[callback-1];
+            callback=vetor_saida[size];
+        size++;
+        }
 
-    while(callback!=0){
-    vetor_saida[size]=vetor_anterior[callback-1];
-        callback=vetor_saida[size];
-    size++;
+        for (int i=0;i<size-2;size--){
+            printf("(%d, %d)", vetor_saida[size-2],vetor_saida[size-3]);
+        }
     }
-
-    for (int i=0;i<size-2;size--){
-        printf("(%d, %d)", vetor_saida[size-2],vetor_saida[size-3]);
-    }
-    printf("\n");
-
-    printf("Custo: %.0f\n", custo_final);
+    printf("\nCusto: %d\n", custo_final);
 }
 
 void Dijkstra(){
@@ -147,7 +142,7 @@ void Dijkstra(){
         usados[i] = 0;
     }
 
-    int inicio = vertice_origem-1; // index da aresta de origem
+    int inicio = vertice_origem-1; // Index da aresta de origem
     custo[inicio] = 0;
     usados[inicio] = 1;
     anterior[inicio] = 0;
@@ -161,7 +156,7 @@ void Dijkstra(){
         no_lock=0;
 
         for(int i = 0; i < quantidade_arcos; i++){ // Iterando sobre as arestas
-            if (GRAFO[i].vertice_inicio == inicio){ // Aquela aresta é a de inicio?
+            if (GRAFO[i].vertice_inicio == inicio){ // Verifica se é a aresta de inicio
 
                 arestas_achadas++;
 
@@ -190,21 +185,30 @@ void Dijkstra(){
             break;
         }
     }
-
-    printf("\n----USADOS----\n");
-    for (int i=0;i<quantidade_vertices; i++){
-        printf("%d ",usados[i]);
-    }
-    printf("\n----CUSTO----\n");
-    for (int i=0;i<quantidade_vertices; i++){
-        printf("%d ",custo[i]);
-    }
-    printf("\n----ANTERIOR----\n");
-    for (int i=0;i<quantidade_vertices; i++){
-        printf("%d ",anterior[i]);
-    }
-    printf("\n");
     printar_saida(anterior,custo[vertice_destino-1]);
 
     libera_grafo();
+}
+
+/* Função para concatenar o caminho do arquivo */
+char* concat(const char *s1, const char *s2)
+{
+    char *result = malloc(strlen(s1) + strlen(s2) + 1);
+    strcpy(result, s1);
+    strcat(result, s2);
+    return result;
+}
+
+int main(){
+    char *str;
+    char str1[10] = "arquivos/";
+    char str2[30];
+
+    printf("Insira o nome do arquivo: ");
+    scanf("%s", str2);
+
+    str = concat(str1,str2);
+	cria_grafo(str);
+	Dijkstra();
+	return 0;
 }
