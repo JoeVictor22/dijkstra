@@ -160,10 +160,11 @@ void Dijkstra(){
         int menor_custo = INF;
         int prox_inicial = -1;
 
+        /* Variáveis utilizadas para verificar condição de parada em que todas os vértices conectados já foram utilizados */
         arestas_achadas = 0;
-        no_lock = 0;
+        no_lock = 0; 
 
-        for(int i = 0; i < quantidade_arcos; i++){ // Para cada aresta
+        for(int i = 0; i < quantidade_arcos; i++){ // Para cada aresta salva no vetor GRAFO
             if (GRAFO[i].vertice_inicio == inicio){ // Se o vertice estiver conectado a aresta
                 arestas_achadas++;
                 custo_atual = custo[inicio] + GRAFO[i].peso; // Incrementa custo_atual
@@ -203,7 +204,7 @@ int main(int argc, char **argv){
         return 1;
     }
 
-	cria_grafo(argv[1]);
-	Dijkstra();
-	return 0;
+    cria_grafo(argv[1]);
+    Dijkstra();
+    return 0;  
 }
